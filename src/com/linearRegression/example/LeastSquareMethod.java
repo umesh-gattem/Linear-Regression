@@ -3,6 +3,12 @@ package com.linearRegression.example;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+
+import com.linearRegression.utility.CalculateDeviation;
 
 public class LeastSquareMethod {
 	/**
@@ -19,39 +25,52 @@ public class LeastSquareMethod {
 	 * @author Umesh Kumar Gattem
 	 * @since 18-05-2016
 	 */
-
+	private static final Logger LOGGER = Logger.getLogger(LeastSquareMethod.class);
 	static BufferedReader br = null;
 
-	static double TipAmount[] = new double[20];
-	static String TipAmounts[] = new String[20];
-	static String BillAmounts[] = new String[20];
-	static double BillAmount[] = new double[20];
+	static List<Double> TipAmount = new ArrayList<>();
+	static List<String> BillAmounts = new ArrayList<>();
+	static List<String> TipAmounts = new ArrayList<>();
+	static List<Double> BillAmount = new ArrayList<>();
 	static double TotalBillAmount = 0;
 	static double TotalTipAmount = 0;
-	static double BillDeviation[] = new double[20];
-	static double TipDeviation[] = new double[20];
+	static List<Double> BillDeviation = new ArrayList<>();
+	static List<Double> TipDeviation = new ArrayList<>();
 	static double MeanOfTipAmount;
 	static double MeanOfBillAmount;
-	static double DeviationProduct[] = new double[20];
-	static double BillDeviationSquare[] = new double[20];
+
+	static List<Double> DeviationProduct = new ArrayList<>();
+	static List<Double> BillDeviationSquare = new ArrayList<>();
+
 	static double TotalDeviationProduct;
 	static double TotalBillDeviationSquare;
 	static String indent = "  ";
 	static double SlopeOfLine;
 	static double InterceptFormOfLine;
 	static int choice;
-	static int NoOfValues;
+	public static int NoOfValues;
 
 	public static void main(String[] args) throws IOException {
-
+		LOGGER.info("hai hai hai");
 		System.out.println("No of values");
 		br = new BufferedReader(new InputStreamReader(System.in));
 		String val = br.readLine();
 		NoOfValues = Integer.parseInt(val);
 		insertBillAmountAndTipAmount(NoOfValues);
-		calculateBillAndTipDeviation(NoOfValues);
+
+		BillDeviation = CalculateDeviation.calculateDeviation(NoOfValues, BillAmount, MeanOfBillAmount);
+		TipDeviation = CalculateDeviation.calculateDeviation(NoOfValues, TipAmount, MeanOfTipAmount);
+
+		TotalDeviationProduct = CalculateDeviation.calculateTotalDeviationProduct(NoOfValues, BillDeviation,
+				TipDeviation);
+		TotalBillDeviationSquare = CalculateDeviation.calculateTotalDeviationProduct(NoOfValues, BillDeviation,
+				BillDeviation);
+
+		SlopeOfLine = CalculateDeviation.calculateSlopeOfLine(TotalDeviationProduct, TotalBillDeviationSquare);
+		InterceptFormOfLine = CalculateDeviation.calculateInterceptOfLine(MeanOfTipAmount, MeanOfBillAmount,
+				SlopeOfLine);
+
 		printAllDetails();
-		calcuateSlopeAndIntercept();
 		do {
 			System.out.println("\nEnter any Bill Amount to Predict Tip Amount : ");
 			br = new BufferedReader(new InputStreamReader(System.in));
@@ -63,23 +82,7 @@ public class LeastSquareMethod {
 
 	}
 
-	/**
-	 * 
-	 * Here is the Declaration to Calculate the Slope and Intercept of the Line
-	 * 
-	 */
-	private static void calcuateSlopeAndIntercept() {
-		// TODO Auto-generated method stub
-		SlopeOfLine = TotalDeviationProduct / TotalBillDeviationSquare;
-		System.out.printf("Slope of line is  %.4f\n", +SlopeOfLine);
-
-		InterceptFormOfLine = MeanOfTipAmount - (SlopeOfLine * MeanOfBillAmount);
-
-		System.out.printf("Intercept form of a line is: %.4f \n", +InterceptFormOfLine);
-
-		System.out.printf("Equation of Line is : %.4fx+(%.4f)\n", +SlopeOfLine, +InterceptFormOfLine);
-	}
-
+	
 	/**
 	 * Here is the declaration of Print all details
 	 * 
@@ -90,35 +93,15 @@ public class LeastSquareMethod {
 		System.out.println("Bill Amount     " + " Tip Amount" + "       Bill Deviation" + "       Tip Deviation"
 				+ "       Deviation Product" + "    Bill Deviation Square");
 		for (int i = 0; i < NoOfValues; i++) {
-			System.out.println("   " + BillAmount[i] + indent + indent + indent + indent + indent + indent
-					+ TipAmount[i] + indent + indent + indent + indent + indent + indent + BillDeviation[i] + indent
-					+ indent + indent + indent + indent + indent + indent + indent + TipDeviation[i] + indent + indent
-					+ indent + indent + indent + indent + indent + indent + indent + DeviationProduct[i] + indent
-					+ indent + indent + indent + indent + indent + indent + indent + BillDeviationSquare[i]);
+			System.out.println("   " + BillAmount.get(i) + indent + indent + indent + indent + indent + indent
+					+ TipAmount.get(i) + indent + indent + indent + indent + indent + indent + BillDeviation.get(i) + indent
+					+ indent + indent + indent + indent + indent + indent + indent + TipDeviation.get(i) + indent + indent
+					+ indent + indent + indent + indent + indent + indent + indent + DeviationProduct.get(i) + indent
+					+ indent + indent + indent + indent + indent + indent + indent + BillDeviationSquare.get(i));
 		}
 
 	}
 
-	/**
-	 * Here is the declaration of Calculate the Bill Deviation and Tip Deviation
-	 * 
-	 * 
-	 * @param NoOfValues
-	 */
-	private static void calculateBillAndTipDeviation(int NoOfValues) {
-		// TODO Auto-generated method stub
-		for (int i = 0; i < NoOfValues; i++) {
-			BillDeviation[i] = BillAmount[i] - MeanOfBillAmount;
-			TipDeviation[i] = TipAmount[i] - MeanOfTipAmount;
-		}
-		for (int i = 0; i < NoOfValues; i++) {
-			DeviationProduct[i] = BillDeviation[i] * TipDeviation[i];
-			BillDeviationSquare[i] = BillDeviation[i] * BillDeviation[i];
-			TotalDeviationProduct += DeviationProduct[i];
-			TotalBillDeviationSquare += BillDeviationSquare[i];
-		}
-
-	}
 
 	/**
 	 * Here is the declaration of inserting Sample Bill Amount and Tip Amount .
@@ -135,7 +118,7 @@ public class LeastSquareMethod {
 		System.out.println("Enter the Bill Amount data");
 		for (int i = 0; i < NoOfValues; i++) {
 			br = new BufferedReader(new InputStreamReader(System.in));
-			BillAmounts[i] = br.readLine();
+			BillAmounts.get(i) = br.readLine();
 			BillAmount[i] = Double.parseDouble(BillAmounts[i]);
 			TotalBillAmount += BillAmount[i];
 		}
